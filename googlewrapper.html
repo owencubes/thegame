@@ -1,0 +1,17 @@
+<!DOCTYPE html>
+<html>
+<head>
+  <script>
+    function redirectToForm() {
+      const userAgent = navigator.userAgent; // Captures device metadata
+      const formURL = "https://docs.google.com/forms/d/e/1FAIpQLSfvqWRCqtZg82fAA1_nFCjDGf3tse1TlU7Nt7wu5FxYOmMKbg/viewform"; // Replace with your Google Form URL
+      const metadata = encodeURIComponent(userAgent); // Encode metadata
+      const finalURL = `${formURL}?usp=pp_url&entry.312621573=${metadata}&entry.309372013=1`
+      window.location.href = finalURL;
+    }
+  </script>
+</head>
+<body onload="redirectToForm()">
+  <h1>Loading...</h1>
+</body>
+</html>
