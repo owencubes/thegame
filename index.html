@@ -5,6 +5,47 @@
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
   <title>Drinking Game NFC Score Tracker</title>
   <script src="https://code.jquery.com/jquery-3.6.0.min.js"></script>
+  <style>
+    body {
+      font-family: Arial, sans-serif;
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      margin-top: 50px;
+    }
+
+    #nameInputWrapper {
+      display: none;
+      margin-top: 20px;
+      text-align: center;
+    }
+
+    input[type="text"] {
+      padding: 10px;
+      margin: 5px;
+      font-size: 16px;
+      border: 1px solid #ccc;
+    }
+
+    button {
+      padding: 10px 20px;
+      font-size: 16px;
+      cursor: pointer;
+      background-color: #4CAF50;
+      color: white;
+      border: none;
+      border-radius: 5px;
+    }
+
+    button:hover {
+      background-color: #45a049;
+    }
+
+    .info {
+      font-size: 18px;
+      text-align: center;
+    }
+  </style>
   <script>
     // Function to auto-submit form data to Google Apps Script Web App URL
     function autoSubmitForm(metadata, name) {
@@ -15,7 +56,7 @@
 
       // Send the form data as a JSON object to your Google Apps Script URL
       $.ajax({
-        url: 'https://script.google.com/macros/s/AKfycbzoVucYKTVlmcuT_DzMy2Vol8pGO2K0tRbf2oxAw8p4z1N7MllNwvnPBMwUf71dMslE/exec',  // Replace with your Google Apps Script Web App URL
+        url: 'YOUR_GOOGLE_APPS_SCRIPT_URL',  // Replace with your Google Apps Script Web App URL
         method: 'POST',
         contentType: 'application/json',
         data: JSON.stringify(formData),
@@ -28,33 +69,40 @@
       });
     }
 
-    // Function to simulate NFC scan, this can be replaced with actual NFC scan logic
+    // Function to handle NFC scan
     function onNFCScan(metadata) {
       if (!metadata) {
         console.error("No NFC metadata found!");
         return;
       }
 
-      // Check if metadata already exists and whether the name has been entered previously
-      const name = localStorage.getItem('playerName') || null;
+      // Check if the player name is already saved in localStorage
+      const name = localStorage.getItem('playerName');
 
       if (!name) {
-        // If the player name is not saved, prompt the user to enter their name
-        const playerName = prompt("Please enter your name (first time only):");
-        if (playerName) {
-          // Save the name in local storage for future scans
-          localStorage.setItem('playerName', playerName);
-          autoSubmitForm(metadata, playerName);  // First time: submit both metadata and name
-        } else {
-          alert("Name is required to continue.");
-        }
+        // If name isn't saved, show the input field for name entry
+        document.getElementById('nameInputWrapper').style.display = 'block';
+        document.getElementById('nfcScanMessage').style.display = 'none';
+
+        // Set up submit button to save name and submit form
+        document.getElementById('submitName').onclick = function () {
+          const playerName = document.getElementById('nameInput').value.trim();
+          if (playerName) {
+            localStorage.setItem('playerName', playerName);  // Save name for future scans
+            autoSubmitForm(metadata, playerName);  // Submit form
+            document.getElementById('nameInputWrapper').style.display = 'none';  // Hide the input
+            document.getElementById('nfcScanMessage').style.display = 'block';  // Show scan message again
+          } else {
+            alert("Please enter a valid name!");
+          }
+        };
       } else {
-        // If the player has previously entered their name, just submit the metadata and name
+        // If name is already saved, just submit the metadata and name
         autoSubmitForm(metadata, name);
       }
     }
 
-    // Simulate NFC scan when the page loads (replace this with actual NFC code)
+    // Simulate NFC scan when the page loads (replace this with actual NFC scan logic)
     $(document).ready(function() {
       // Replace the line below with your actual NFC scanning logic or API
       const simulatedMetadata = "sample_metadata_12345";  // Replace with actual NFC tag data
@@ -68,8 +116,13 @@
 </head>
 <body>
   <h1>Welcome to the Drinking Game Tracker</h1>
-  <p>This page tracks your score using NFC. Your score will be updated automatically when you scan your NFC tag.</p>
-  
-  <p><strong>Note:</strong> This is your first scan, please enter your name to start.</p>
+  <p class="info" id="nfcScanMessage">Scan your NFC tag to start!</p>
+
+  <!-- This input will show up on first scan to ask the player for their name -->
+  <div id="nameInputWrapper">
+    <p>Please enter your name:</p>
+    <input type="text" id="nameInput" placeholder="Enter your name" />
+    <button id="submitName">Submit</button>
+  </div>
 </body>
 </html>
